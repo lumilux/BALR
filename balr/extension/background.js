@@ -10,7 +10,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 			xhr.open('HEAD', url, true);
 			xhr.onloadend = function() {
 				if(xhr.status === 0) {
-					// if there's a bad status, we redirect to BALR's page
+					// if there's a bad XHR status, we redirect to BALR's page
 					chrome.tabs.update({'url': chrome.extension.getURL('balr.html?'+url)});
 				}
 			};

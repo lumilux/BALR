@@ -7,17 +7,44 @@
 		<h1>Something seemed to go wrong...</h1>
 		<p>It looks like you've stumbled on a page that no longer exists! You can <a id="orig_link">try loading the page again</a> or click on a user-contributed link below.</p>
 
+		<ul id="alts"></ul>
+
 		<script>
 			// fields
-			var origin = window.location.search.substring(1); // balr.html?http://original.com ==> http://original.com
+			var origin = window.location.search.substring(1); // the "dead" link, passed in as the URL's query param
 			var returnUrl = origin;
 			returnUrl += (origin.match(/\?/) === null ? '?nobalr' : '&nobalr');
 
 			// retrieving alternative URLs
+			var xhr = new XMLHttpRequest();
+			xhr.open('GET', 'http://localhost:3000/alts/'+encodeURIComponent(origin));
+			xhr.onreadystatechange = function() {
+				if(this.readyState === 4) {
+					var res = JSON.parse(this.responseText);
+
+					if(res.status === 'ok') {
+						// if everything went okay, populate the list of alternative URLs
+						var altsList = document.getElementById('alts');
+						for(var i = 0; i < res.alternatives.length; i++) {
+							var alt = res.alternatives[i];
+							console.log(alt);
+							var li = document.createElement('li');
+							li.innerHTML = '<a href="'+alt.url+'">'+alt.url+'</a> ('+alt.clicks+')';
+							altsList.appendChild(li);
+						}
+					} else {
+						// there was a server-side error...
+
+					}
+				}
+			};
+			xhr.send(null);
 
 			// DOM
 			var orig_link = document.getElementById('orig_link');
 			orig_link.href = returnUrl;
+
+			document.title += ' \u00bb '+origin;
 
 		</script>
 	</body>
