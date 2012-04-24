@@ -1,0 +1,16 @@
+{
+	"name": "BALR Chrome Extension",
+	"version": "0.1",
+	"description": "Makes ur urls the shit",
+	"permissions": [
+    	"tabs",
+    	"http://*/"
+  	],
+  	"background": {
+  		"scripts": ["background.js"]
+  	},
+	"content_scripts": [ {
+		"matches": ["<all_urls>"],
+		"js": ["balr.js"]
+	} ]
+}

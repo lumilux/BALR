@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>BALR</title>
+	</head>
+	<body>
+		<h1>Something seemed to go wrong...</h1>
+		<p>It looks like you've stumbled on a page that no longer exists! You can <a id="orig_link">try loading the page again</a> or click on a user-contributed link below.</p>
+
+		<script>
+			// fields
+			var origin = window.location.search.substring(1); // balr.html?http://original.com ==> http://original.com
+			var returnUrl = origin;
+			returnUrl += (origin.match(/\?/) === null ? '?nobalr' : '&nobalr');
+
+			// retrieving alternative URLs
+
+			// DOM
+			var orig_link = document.getElementById('orig_link');
+			orig_link.href = returnUrl;
+
+		</script>
+	</body>
+</html>
