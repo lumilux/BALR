@@ -6,12 +6,18 @@ require 'bcrypt'
 set :redis, 'redis://localhost:6379/0'
 set :path, 'http://localhost:4567'
 
+enable :sessions
+
 get '/' do
+	checkAuth()
+
 	@title = 'Home'
 	erb :index
 end
 
 get '/signup' do
+	checkAuth()
+
 	@title = 'Sign Up'
 
 	@failed_login = params[:redirected]
@@ -19,14 +25,28 @@ get '/signup' do
 end
 
 get '/login' do
+	checkAuth()
+
 	@title = 'Log in'
 
 	@failed_login = params[:failed]
 	erb :login
 end
 
+get '/logout' do
+	session[:auth] = false
+
+	@title = 'Logged Out'
+
+	erb :logout
+end
+
 # TODO: homescreen will show score, badges, and contributed links
 get '/home' do
+	if not session[:auth]
+		redirect '/login'
+	end
+	
 	@title = 'Your Homepage'
 
 	erb :home
@@ -65,6 +85,7 @@ post '/login' do
 		@bcrypt_pass = BCrypt::Password.new @hashed_pass
 		
 		if @bcrypt_pass == @password
+			session[:auth] = true
 			redirect '/home'
 		else
 			redirect '/login?failed=1'
@@ -98,5 +119,11 @@ post '/new/user' do
 		'true'
 	else
 		'false'
+	end
+end
+
+def checkAuth()
+	if session[:auth]
+		redirect '/home'
 	end
 end
