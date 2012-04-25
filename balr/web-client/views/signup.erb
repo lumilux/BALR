@@ -1,0 +1,27 @@
+<%= erb :header %>
+<div id="main">
+	<form id="signup_form" onsubmit="return false;">
+		<input type="text" name="username" /><br />
+		<input type="password" name="password" /><br />
+		<input type="submit" />
+	</form>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function() {
+	$('#signup_form').submit(function(e) {
+		$.ajax({
+			url: '<%= options.path %>/new/user',
+			type: 'POST',
+			data: {
+				'username': $('input[name="username"]').val(),
+				'password': $('input[name="password"]').val()
+			},
+			success: function(data) {
+				console.log(data);
+			}
+		});
+	});
+});
+</script>
+<%= erb :footer %>
