@@ -23,7 +23,7 @@
 					var res = JSON.parse(this.responseText);
 
 					if(res.status === 'ok') {
-						// if everything went okay, populate the list of alternative URLs
+						// if everything went okay server-side, populate the list of alternative URLs
 						var altsList = document.getElementById('alts');
 						for(var i = 0; i < res.alternatives.length; i++) {
 							var alt = res.alternatives[i];
