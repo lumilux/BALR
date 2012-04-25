@@ -1,5 +1,8 @@
 <%= erb :header %>
 <div id="main">
+	<% if @failed_login %>
+		<p>Are you registered yet? We couldn't find your username!</p>
+	<% end %>
 	<form id="signup_form" onsubmit="return false;">
 		<input type="text" name="username" /><br />
 		<input type="password" name="password" /><br />
