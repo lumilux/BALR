@@ -25,10 +25,32 @@ get '/login' do
 	erb :login
 end
 
+# TODO: homescreen will show score, badges, and contributed links
 get '/home' do
 	@title = 'Your Homepage'
 
 	erb :home
+end
+
+get '/user/:username' do
+	@username = params[:username]
+	@title = 'Overview for '+@username
+
+	# get list of this user's contributed links
+	@user_contributions = {}
+	@user_deadlinks = redis.lrange('contributions:'+@username, 0, -1)
+	@user_deadlinks.each { |deadlink|
+		@user_contributions[deadlink] = [] # array of hashes: [{altlink, score}, {altlink, score}, ... ]
+		@alt_links = redis.lrange('contributions:'+@username+':'+deadlink, 0, -1)
+		@alt_links.each { |altlink|
+			@altlink_score = redis.hget('alts:'+deadlink, altlink)
+			@user_contributions[deadlink].push( {'alt' => altlink, 'score' => @altlink_score} )
+		}
+	}
+
+	puts @user_contributions.inspect
+
+	erb :user_overview
 end
 
 post '/login' do
