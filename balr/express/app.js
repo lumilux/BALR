@@ -43,29 +43,38 @@ app.listen(3000, function(){
 
 app.get('/alts/:dead_url', function(req, res, next) {
   dead_url = querystring.unescape(req.params.dead_url);
-  //console.log(req.params.dead_url);
   console.log(dead_url);
   // return status, dead_location, alternatives
    
   r.sismember('dead_locs', dead_url, function(err, reply) {
+    if(err) return next(new Error('something went wrong with redis'));
     if(reply) {
       r.exists('alts:'+dead_url, function(err, reply) {
+        if(err) return next(new Error('something went wrong with redis'));
         if(reply) {
           r.hgetall('alts:'+dead_url, function(err, obj) {
-            if(err) return next(new Error('could not get alternatives for: ' + dead_url));
+            if(err) return next(new Error('something went wrong with redis'));
             alts_json = [];
             for(var alt in obj) {
               alts_json.push({url: alt, clicks: obj[alt]});
             }
-            res.json(alts_json);
+            res.json({status: 'ok', dead_location: dead_url, alternatives: alts_json});
           });
         } else {
-          return next(new Error('dead url not in alts: ' + dead_url));
+          res.json({status: 'error', message: 'dead url not in alts: ' + dead_url}, 404);
         }
       });
     } else {
-      return next(new Error('dead url not in dead_locs: ' + dead_url));
+      r.sadd('dead_locs', dead_url, function(err, reply) {
+        if(err) return next(new Error('something went wrong with redis'));
+        res.json({status: 'ok', dead_location: dead_url, alternatives: []});
+      });
     }
   });
   console.log('wat.');
+});
+
+app.put('/alts/:dead_url', function(req, res, next) {
+  dead_url = querystring.unescape(req.params.dead_url);
+  console.log(dead_url);
 });
