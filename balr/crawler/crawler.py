@@ -3,6 +3,7 @@ import urllib2
 import redis
 import time
 import sys
+from collections import deque
 
 br = mechanize.Browser()
 cookies = mechanize.CookieJar()
@@ -13,12 +14,12 @@ br.set_handle_robots(False)
 r = redis.Redis(host='localhost', port=6379, db=4)
 r2 = redis.Redis(host='localhost', port=6379, db=5)
 
-links_to_crawl = set([sys.argv[1]])
+links_to_crawl = deque([sys.argv[1]])
 
 print links_to_crawl
 
 while True:
-    next_url = links_to_crawl.pop()
+    next_url = links_to_crawl.popleft()
     print('checking: ' + next_url)
     print(str(len(links_to_crawl)))
     
@@ -28,13 +29,17 @@ while True:
     try:
         response = br.open(next_url)
         if response.code == 200:
-            if len(links_to_crawl) <= 50:
-                for link in br.links(): #(s for s in br.links() if s.tag == 'a'):
-                    links_to_crawl.add(link.absolute_url)
+            if len(links_to_crawl) <= 500:
+                for link in br.links():
+                    #print link
+                    if link.url.startswith('//') or link.url[0] != '/':
+                        links_to_crawl.append(link.absolute_url)
+    except mechanize.BrowserStateError as e:
+        continue
     except (urllib2.HTTPError, urllib2.URLError) as e:
         r.sadd('dead_locs', next_url)
         print('dead: ' + next_url)
     
     r2.sadd('checked', next_url)
-    time.sleep(1.0)
+    time.sleep(0.5)
 
