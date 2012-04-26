@@ -12,6 +12,8 @@ var redis = require('redis')
 
 r.select(4);
 
+var REDIS_ERROR = 'something went wrong with redis';
+
 var app = module.exports = express.createServer();
 
 // Configuration
@@ -47,18 +49,18 @@ app.get('/alts/:dead_url', function(req, res, next) {
   // return status, dead_location, alternatives
    
   r.sismember('dead_locs', dead_url, function(err, reply) {
-    if(err) return next(new Error('something went wrong with redis'));
+    if(err) return next(new Error(REDIS_ERROR));
     if(reply) {
       r.exists('alts:'+dead_url, function(err, reply) {
-        if(err) return next(new Error('something went wrong with redis'));
+        if(err) return next(new Error(REDIS_ERROR));
         if(reply) {
           r.hgetall('alts:'+dead_url, function(err, obj) {
-            if(err) return next(new Error('something went wrong with redis'));
+            if(err) return next(new Error(REDIS_ERROR));
             alts_json = [];
             for(var alt in obj) {
               alts_json.push({url: alt, clicks: obj[alt]});
             }
-            res.json({status: 'ok', dead_location: dead_url, alternatives: alts_json});
+            res.json({status: 'ok', dead_location: dead_url, alternatives: alts_json}, 200);
           });
         } else {
           res.json({status: 'error', message: 'dead url not in alts: ' + dead_url}, 404);
@@ -66,8 +68,8 @@ app.get('/alts/:dead_url', function(req, res, next) {
       });
     } else {
       r.sadd('dead_locs', dead_url, function(err, reply) {
-        if(err) return next(new Error('something went wrong with redis'));
-        res.json({status: 'ok', dead_location: dead_url, alternatives: []});
+        if(err) return next(new Error(REDIS_ERROR));
+        res.json({status: 'ok', dead_location: dead_url, alternatives: []}, 201);
       });
     }
   });
@@ -77,4 +79,20 @@ app.get('/alts/:dead_url', function(req, res, next) {
 app.put('/alts/:dead_url', function(req, res, next) {
   dead_url = querystring.unescape(req.params.dead_url);
   console.log(dead_url);
+  if('alternative' in req.body) {
+    alt_url = req.body.alternative;
+    r.sismember('dead_locs', dead_url, function(err, reply) {
+      if(err) return next(new Error(REDIS_ERROR));
+      //add dead_url to dead_locs set whether or not it's already a member
+      r.sadd('dead_locs', dead_url, function(err, reply) {
+        if(err) return next(new Error(REDIS_ERROR));
+        r.hincrby('alts:'+dead_url, alt_url, 0, function(err, reply) {
+          if(err) return next(new Error(REDIS_ERROR));
+          res.json(201); //resource created.
+        });
+      });
+    });
+  } else {
+    res.json({status: 'error', message: 'missing alternative'}, 400);
+  }
 });
