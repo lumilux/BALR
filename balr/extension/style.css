@@ -1,0 +1,19 @@
+body {
+	width:100%;
+}
+
+#new_link_form {
+	width:400px;
+	text-align:center;
+	margin:0 auto;
+}
+
+#new_link_text {
+	font-size:20px;
+	width:400px;
+	display:block;
+}
+
+#new_link_submit {
+	font-size:20px;
+}

@@ -77,22 +77,27 @@ app.get('/alts/:dead_url', function(req, res, next) {
 });
 
 app.put('/alts/:dead_url', function(req, res, next) {
-  dead_url = querystring.unescape(req.params.dead_url);
-  console.log(dead_url);
-  if('alternative' in req.body) {
-    alt_url = req.body.alternative;
-    r.sismember('dead_locs', dead_url, function(err, reply) {
-      if(err) return next(new Error(REDIS_ERROR));
-      //add dead_url to dead_locs set whether or not it's already a member
-      r.sadd('dead_locs', dead_url, function(err, reply) {
+  // put is oddball, needs req.on(data) listener
+  req.setEncoding('utf8');
+  req.on('data', function(data) {
+    dead_url = querystring.unescape(req.params.dead_url);
+    console.log(dead_url);
+    var jsonData = JSON.parse(data);
+    if('alternative' in jsonData) {
+      alt_url = jsonData.alternative;
+      r.sismember('dead_locs', dead_url, function(err, reply) {
         if(err) return next(new Error(REDIS_ERROR));
-        r.hincrby('alts:'+dead_url, alt_url, 0, function(err, reply) {
+        //add dead_url to dead_locs set whether or not it's already a member
+        r.sadd('dead_locs', dead_url, function(err, reply) {
           if(err) return next(new Error(REDIS_ERROR));
-          res.json(201); //resource created.
+          r.hincrby('alts:'+dead_url, alt_url, 0, function(err, reply) {
+            if(err) return next(new Error(REDIS_ERROR));
+            res.json(201); //resource created.
+          });
         });
       });
-    });
-  } else {
-    res.json({status: 'error', message: 'missing alternative'}, 400);
-  }
-});
+    } else {
+      res.json({status: 'error', message: 'missing alternative'}, 400);
+    }
+  }); // end req.on(data)
+}); // end app.put
