@@ -87,12 +87,20 @@ app.put('/alts/:dead_url', function(req, res, next) {
       alt_url = jsonData.alternative;
       r.sismember('dead_locs', dead_url, function(err, reply) {
         if(err) return next(new Error(REDIS_ERROR));
+        
         //add dead_url to dead_locs set whether or not it's already a member
         r.sadd('dead_locs', dead_url, function(err, reply) {
           if(err) return next(new Error(REDIS_ERROR));
+
+          // create add field alt_url with value 0 to alts:dead_url set
           r.hincrby('alts:'+dead_url, alt_url, 0, function(err, reply) {
             if(err) return next(new Error(REDIS_ERROR));
-            res.json(201); //resource created.
+
+            // TODO: refs
+            // TODO: add to contributions:user
+            // TODO: add to contributions:user:dead_url
+
+            res.json(201); // everything went better than expected
           });
         });
       });
