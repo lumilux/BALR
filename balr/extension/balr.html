@@ -1,10 +1,12 @@
 <!DOCTYPE html>
+
 <html>
 	<head>
 		<title>BALR</title>
 		<link rel="stylesheet" href="style.css" />
 	</head>
 	<body>
+		<div id="feedback"></div>
 		<h1>Something seemed to go wrong...</h1>
 		<p>It looks like you've stumbled on a page that no longer exists! You can <a id="orig_link">try loading the page again</a> or click on a user-contributed link below.</p>
 
@@ -14,13 +16,13 @@
 		<h2>Get in the game!</h2>
 		<p>This page is shown courtesy BALR ("Battle Against Link Rot"), a service that helps improve the web, one dead link at a time. You can help out in this effort too! Submit an alternative URL for this dead link below, and it will be saved for others that stumble on this dead page as well.</p>
 
-		<form id="new_link_form">
+		<form id="new_link_form" onsubmit="submitAlt(); return false;">
 			<input type="text" id="new_link_text" />
-			<input type="submit" id="new_link_submit" onsubmit="submitAlt()" />
+			<input type="submit" id="new_link_submit" />
 		</form>
 
 		<script>
-			var BASE_URL = 'http://localhost:3000/';
+			var BASE_URL = 'http://localhost:3000/'; // local testing
 
 			// fields
 			var origin = window.location.search.substring(1); // the "dead" link, passed in as the URL's query param
@@ -38,20 +40,16 @@
 					if(res.status === 'ok') {
 						// if everything went okay server-side, populate the list of alternative URLs
 						if(res.alternatives.length === 0) {
-							var noLinksPara = document.getElementById('no_links');
-							noLinksPara.innerHTML = "Sorry, but currently no user-contributed links currently exist for this page. Why don't you get in the game and submit your own below?";
+							noLinks();
 						} else {
-							var altsList = document.getElementById('alts');
 							for(var i = 0; i < res.alternatives.length; i++) {
-								var alt = res.alternatives[i];
-								console.log(alt);
-								var li = document.createElement('li');
-								li.innerHTML = '<a href="'+alt.url+'">'+alt.url+'</a> ('+alt.clicks+')';
-								altsList.appendChild(li);
+								addAlt(res.alternatives[i]);
 							}
 						}
+					} else if(this.status === 404) {
+						noLinks();
 					} else {
-						// there was a server-side error...
+						// there was some other server-side error...
 
 					}
 				}
@@ -72,12 +70,42 @@
 				} else {
 					// TODO: check to see if this thing is valid first
 
-					var reqObj = {
+					var reqData = {
 						'alternative': alt_url
 					};
-					
-
+					var xhr = new XMLHttpRequest();
+					xhr.open('PUT', BASE_URL+'alts/'+encodeURIComponent(origin), true);
+					xhr.onreadystatechange = function() {
+						if(xhr.readyState === 4) {
+							// done! give feedback to user
+							// TODO: turn this shit into jquery
+							if(xhr.responseText === '201') {
+								addAlt({'url': alt_url, 'clicks': 0});
+								var feedback = document.getElementById('feedback');
+								feedback.innerHTML = 'Your link has been successfully submitted!';
+							} else {
+								var feedback = document.getElementById('feedback');
+								feedback.innerHTML = 'Your need to actually submit a link!';
+							}
+						}
+					};
+					xhr.send(JSON.stringify(reqData));
 				}
+			}
+
+			// adds an alternative link to the list of alternative links (purely visual add)
+			// alt is an object with url and clicks properties
+			function addAlt(alt) {
+				var altsList = document.getElementById('alts');
+				var li = document.createElement('li');
+				li.innerHTML = '<a href="'+alt.url+'">'+alt.url+'</a> ('+alt.clicks+')';
+				altsList.appendChild(li);
+			}
+
+			// show to the user there were no links
+			function noLinks() {
+				var noLinksPara = document.getElementById('no_links');
+				noLinksPara.innerHTML = "Sorry, but currently no user-contributed links currently exist for this page. Why don't you get in the game and submit your own below?";
 			}
 
 		</script>
