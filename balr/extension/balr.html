@@ -32,12 +32,17 @@
 		</div>
 
 		<script>
+			// base url for node, not sinatra
 			var BASE_URL = 'http://localhost:3000/'; // local testing
 
 			// fields
-			var origin = window.location.search.substring(1); // the "dead" link, passed in as the URL's query param
-			var returnUrl = origin;
-			returnUrl += (origin.match(/\?/) === null ? '?nobalr' : '&nobalr');
+			var f = window.location.search.split('&');
+			var origin = f[0].substring(1); // dead URL
+			var returnUrl = origin + (origin.match(/\?/) === null ? '?nobalr' : '&nobalr'); // url to return to = deadurl + ?nobalr
+			var referrer = f[1].substring(4);
+			var linktext = f[2].substring(9);
+
+			console.log('REFERRER IS ', referrer);
 
 			// retrieving alternative URLs
 			var xhr = new XMLHttpRequest();
@@ -84,13 +89,16 @@
 					chrome.extension.sendRequest({'type': 'auth'}, function(response) {
 						if(response.authenticated) {
 							var reqData = {
-								'alternative': alt_url
+								'alternative': alt_url,
+								'referrer': referrer,
+								'linktext': linktext,
+								'username': response.username
 							};
 							var xhr = new XMLHttpRequest();
 							xhr.open('PUT', BASE_URL+'alts/'+encodeURIComponent(origin), true);
 							xhr.onreadystatechange = function() {
 								if(xhr.readyState === 4) {
-									// done! give feedback to user
+									// done! give visual feedback to user
 									// TODO: turn this shit into jquery
 									if(xhr.responseText === '201') {
 										addAlt({'url': alt_url, 'clicks': 0});
@@ -103,6 +111,7 @@
 								}
 							};
 							xhr.send(JSON.stringify(reqData));
+							console.log('SENT DATA', reqData);
 						} else {
 							// user needs to log in first
 							document.getElementById('balr_login').style.display = 'block';

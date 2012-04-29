@@ -1,9 +1,31 @@
 /* runs everytime a tab changes.
 checks to see if the current page is dead, and if so, redirect to BALR page */
+
+var refs = []; // keep track of referrers for each tab
+var linktext = {}; // keep track of link text so we can save 
+var CURR_TAB_ID; // so linktext has an idea of what tab is current
+
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-	console.log(changeInfo);
+
 	if(changeInfo.status === 'loading') {
+
 		var url = tab.url;
+
+		// update referrer -- needs three because on redirect, 'curr' will be the BALR page
+		// so we lose the referrer with just 2
+		if(refs[tab.id] === undefined) {
+			refs[tab.id] = {
+				'prevprev': null,
+				'prev': null,
+				'curr': null
+			};
+		}
+		
+		refs[tab.id].prevprev = refs[tab.id].prev;
+		refs[tab.id].prev = refs[tab.id].curr;
+		refs[tab.id].curr = url;
+
+		console.log('UPDATED REFS', refs);
 
 		// only worry about http links
 		// and if the balr flag is false, don't do anything
@@ -23,26 +45,22 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 						if(networkXhr.status !== 0) {
 							// if no error, then the original website really is down and we should show BALR suggestions
 							// if networkXhr gets a non-error status code, just render chrome's default
-
-							// but first check to see if logged in
-							var storage = window.localStorage;
-							if(storage) {
-								var user = storage.getItem('balr_user');
-								if(user === null) {
-									chrome.tabs.update({'url': chrome.extension.getURL('balr.html?'+url)});
-								} else {
-
-								}
-							}
-
-							
+							console.log('REFERRER IS '+refs[tab.id].prevprev);
+							console.log('submitting linktext is ', linktext, 'key is ', (tab.windowId+'-'+tab.id), 'val is ', linktext[(tab.windowId+'-'+tab.id)]['ppp']);
+							chrome.tabs.update({'url': chrome.extension.getURL('balr.html?'+url
+								+ '&ref='+refs[tab.id].prevprev
+								+ '&linktext='+linktext[tab.windowId+'-'+tab.id]['ppp'])
+							});
 						}
 					}
 					networkXhr.send(null);
-				}
+				} // end xhr status
 			};
 			xhr.send(null);
 		}
+	} else if(changeInfo.status === 'complete') {
+		console.log("complete, pushing up");
+		updateLinktext('asdf'); // push it up one
 	}
 });
 
@@ -60,7 +78,7 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 			} else {
 				response = {
 					'authenticated': true,
-					'user': user
+					'username': user
 				};
 			}
 			sendResponse(response);
@@ -91,5 +109,36 @@ chrome.extension.onRequest.addListener(function(request, sender, sendResponse) {
 			}
 		};
 		xhr.send(loginData);
+	} else if(request.type === 'url_click') {
+		// update link text list
+		console.log("LINKED CLICKED", request.linktext);
+		updateLinktext(request.linktext);
+		//chrome.tabs.update({'url': request.href});
 	}
 });
+
+function updateLinktext(text) {
+	if(linktext[CURR_TAB_ID] === undefined) {
+		console.log('UNDEFINED!!!');
+		linktext[CURR_TAB_ID] = {
+			'ppp': '',
+			'prevprev': 'agagag',
+			'prev': '',
+			'curr': ''
+		};
+	}
+	console.log('inside update, text is ', text);
+	linktext[CURR_TAB_ID]['ppp'] = linktext[CURR_TAB_ID]['prevprev'];
+	linktext[CURR_TAB_ID]['prevprev'] = linktext[CURR_TAB_ID]['prev'];
+	linktext[CURR_TAB_ID]['prev'] = linktext[CURR_TAB_ID]['curr'];
+	linktext[CURR_TAB_ID]['curr'] = text;
+	console.log('linktext is ', linktext);
+}
+
+/* keep track of the current active tab
+ID will be the key into linktext[] */
+chrome.tabs.onActivated.addListener(function(tabInfo) {
+	CURR_TAB_ID = tabInfo.windowId+'-'+tabInfo.tabId;
+});
+
+

@@ -83,6 +83,7 @@ app.put('/alts/:dead_url', function(req, res, next) {
     dead_url = querystring.unescape(req.params.dead_url);
     console.log(dead_url);
     var jsonData = JSON.parse(data);
+    console.log('JSON DATA', jsonData);
     if('alternative' in jsonData) {
       alt_url = jsonData.alternative;
       r.sismember('dead_locs', dead_url, function(err, reply) {
@@ -93,14 +94,27 @@ app.put('/alts/:dead_url', function(req, res, next) {
           if(err) return next(new Error(REDIS_ERROR));
 
           // create add field alt_url with value 0 to alts:dead_url set
+          // TODO check to see if alt_url is already a member of alts:dead_url set?
           r.hincrby('alts:'+dead_url, alt_url, 0, function(err, reply) {
             if(err) return next(new Error(REDIS_ERROR));
 
-            // TODO: refs
-            // TODO: add to contributions:user
-            // TODO: add to contributions:user:dead_url
+            // add to refs:dead_link list, which holds a list of URLs that refer to this dead link
+            r.sadd('refs:'+dead_url, jsonData.referrer, function(err, reply) {
+              if(err) return next(new Error(REDIS_ERROR));
 
-            res.json(201); // everything went better than expected
+              // add to list of dead urls this user has submitted
+              r.sadd('contributions:'+jsonData.username, dead_url, function(err, reply) {
+                if(err) return next(new Error(REDIS_ERROR));
+
+                // add to list of alternative URLs this user has provided for this particular dead url
+                r.sadd('contributions:'+jsonData.username+':'+dead_url, alt_url, function(err, reply) {
+                  if(err) return next(new Error(REDIS_ERROR));   
+                  
+                  res.json(201); // everything went better than expected               
+                  // HOLY FUCK NESTING
+                });
+              });
+            });
           });
         });
       });
