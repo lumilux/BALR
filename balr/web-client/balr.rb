@@ -77,6 +77,10 @@ post '/login' do
 	@title = 'Logging in...'
 	@username = params[:username].to_s
 	@password = params[:password].to_s
+	@remote = params[:remote] # was this called from the extension? (don't redirect if so)
+
+	puts @remote
+	puts params.inspect
 
 	# check to see if this user exists and redirect if so
 	@r_hash_name = 'users:'+@username
@@ -86,12 +90,24 @@ post '/login' do
 		
 		if @bcrypt_pass == @password
 			session[:auth] = true
-			redirect '/home'
+			if @remote
+				'{"status": true, "username": "'+@username+'"}'
+			else
+				redirect '/home'
+			end
 		else
-			redirect '/login?failed=1'
+			if @remote
+				'{"status": false, "reason": 0}' # 0 = bad login
+			else
+				redirect '/login?failed=1'
+			end
 		end
 	else
-		redirect '/signup?redirected=1'
+		if @remote
+			'{"status": false, "reason": 1}' # 1 = not registered
+		else
+			redirect '/signup?redirected=1'
+		end
 	end
 end
 

@@ -21,6 +21,16 @@
 			<input type="submit" id="new_link_submit" />
 		</form>
 
+		<div id="balr_login" style="display:none;">
+			<h3>you need to log in first to submit a link!</h3>
+			<form id="balr_login_form" onsubmit="login(); return false;">
+				<input type="text" id="username" />
+				<input type="password" id="password" />
+				<input type="submit" id="balr_login_submit" />
+			</form>
+			<a>don't have a BALR account?</a>
+		</div>
+
 		<script>
 			var BASE_URL = 'http://localhost:3000/'; // local testing
 
@@ -69,27 +79,35 @@
 					// no link!
 				} else {
 					// TODO: check to see if this thing is valid first
-
-					var reqData = {
-						'alternative': alt_url
-					};
-					var xhr = new XMLHttpRequest();
-					xhr.open('PUT', BASE_URL+'alts/'+encodeURIComponent(origin), true);
-					xhr.onreadystatechange = function() {
-						if(xhr.readyState === 4) {
-							// done! give feedback to user
-							// TODO: turn this shit into jquery
-							if(xhr.responseText === '201') {
-								addAlt({'url': alt_url, 'clicks': 0});
-								var feedback = document.getElementById('feedback');
-								feedback.innerHTML = 'Your link has been successfully submitted!';
-							} else {
-								var feedback = document.getElementById('feedback');
-								feedback.innerHTML = 'Your need to actually submit a link!';
-							}
+					
+					// first thing to check is if the user is logged into the BALR service
+					chrome.extension.sendRequest({'type': 'auth'}, function(response) {
+						if(response.authenticated) {
+							var reqData = {
+								'alternative': alt_url
+							};
+							var xhr = new XMLHttpRequest();
+							xhr.open('PUT', BASE_URL+'alts/'+encodeURIComponent(origin), true);
+							xhr.onreadystatechange = function() {
+								if(xhr.readyState === 4) {
+									// done! give feedback to user
+									// TODO: turn this shit into jquery
+									if(xhr.responseText === '201') {
+										addAlt({'url': alt_url, 'clicks': 0});
+										var feedback = document.getElementById('feedback');
+										feedback.innerHTML = 'Your link has been successfully submitted!';
+									} else {
+										var feedback = document.getElementById('feedback');
+										feedback.innerHTML = 'Your need to actually submit a link!';
+									}
+								}
+							};
+							xhr.send(JSON.stringify(reqData));
+						} else {
+							// user needs to log in first
+							document.getElementById('balr_login').style.display = 'block';
 						}
-					};
-					xhr.send(JSON.stringify(reqData));
+					});
 				}
 			}
 
@@ -106,6 +124,27 @@
 			function noLinks() {
 				var noLinksPara = document.getElementById('no_links');
 				noLinksPara.innerHTML = "Sorry, but currently no user-contributed links currently exist for this page. Why don't you get in the game and submit your own below?";
+			}
+
+			function login() {
+				var reqData = {
+					'type': 'login', 
+					'formData': {
+						'username': document.getElementById('username').value,
+						'password': document.getElementById('password').value,
+						'remote': true
+					}
+				};
+				chrome.extension.sendRequest(reqData, function(response) {
+					console.log(response);
+					if(response.status) {
+						// save link
+						console.log('login successfully');
+						submitAlt();
+					} else {
+						alert("login info not valid!");
+					}
+				});
 			}
 
 		</script>

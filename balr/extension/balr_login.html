@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<html>
+	<head>
+		<title>BALR</title>
+	</head>
+	<body>
+		<div id="feedback"></div>
+		<h1>Something seemed to go wrong...</h1>
+		<p>It looks like you've stumbled on a page that no longer exists! You can <a id="orig_link">try loading the page again</a> or click on a user-contributed link below.</p>
+
+		<p id="no_links"></p>
+		<ul id="alts"></ul>
+
+		<h2>Get in the game!</h2>
+		<p>This page is shown courtesy BALR ("Battle Against Link Rot"), a service that helps improve the web, one dead link at a time. You can help out in this effort too! Submit an alternative URL for this dead link below, and it will be saved for others that stumble on this dead page as well.</p>
+
+		<form id="new_link_form" onsubmit="submitAlt(); return false;">
+			<input type="text" id="new_link_text" />
+			<input type="submit" id="new_link_submit" />
+		</form>
+
+		<script>
+			var BASE_URL = 'http://localhost:3000/'; // local testing
+
+
+
+		</script>
+	</body>
+</html>
