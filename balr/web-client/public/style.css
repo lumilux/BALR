@@ -69,6 +69,18 @@ header {
   height:100px;
 }
 
+table {
+  margin:20px;
+}
+
+thead {
+  font-weight:bold;
+}
+
+td {
+  padding:8px;
+}
+
 /* TOP MENU */
 
 .menu {
@@ -77,20 +89,15 @@ header {
 
 .menu li {
   display:inline;
+  margin:0 10px;
 }
 
 /* battle.erb */
 
 #dead_locs_table {
-  margin:20px;
-}
-
-#dead_locs_table thead {
-  font-weight:bold;
 }
 
 #dead_locs_table td {
-  padding:8px;
 }
 
 .submission_clicker {

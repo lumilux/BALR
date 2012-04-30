@@ -1,0 +1,21 @@
+<%= erb :header %>
+<%= erb :loggedin_menu %>
+
+<table id="leaderboard">
+	<thead>
+		<tr>
+			<td>User</td>
+			<td>Score</td>
+		</tr>
+	</thead>
+	<tbody>
+		<% @users.each do |user| %>
+		<tr>
+			<td><%= user['username'] %></td>
+			<td><%= user['score'] %></td>
+		</tr>
+		<% end %>
+	</tbody>
+</table>
+
+<%= erb :footer %>

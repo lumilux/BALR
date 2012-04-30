@@ -173,7 +173,19 @@ get '/leaderboard' do
 
 	@title = 'Leaderboard'
 	
+	@usernames = redis.smembers 'users'
+	@users = []
+	@usernames.each { |user|
+		@curr = redis.hgetall 'users:'+user
+		@curr.delete('password')
+		@curr['username'] = user
+		@users.push(@curr)
+	}
 
+	@users = @users.sort_by { |hash| hash['score'] }
+	@users.reverse!
+
+	erb :leaderboard
 end
 
 def checkAuth()
