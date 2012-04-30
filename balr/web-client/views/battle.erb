@@ -1,0 +1,70 @@
+<%= erb :header %>
+<%= erb :loggedin_menu %>
+<p>Help fight the battle against link rot! Below are some links that need alternative resources.</p>
+<table id="dead_locs_table">
+	<thead>
+		<tr>
+			<td>Dead Link</td>
+			<td>Referring page</td>
+			<td colspan="2">Take action!</td>
+		</tr>
+	</thead>
+	<tbody>
+		<% @links.each do |link| %>
+		<tr>
+			<td><a href="<%= link['dead_loc'] %>"><%= link['dead_loc'] %></a></td>
+			<td>
+				<% if link['refs'].length == 0 %>
+					<em>No referrer</em>
+				<% else %>
+					<ul>
+					<% link['refs'].each do |ref| %>
+						<li><a href="<%= ref %>"><%= ref %></a></li>
+					<% end %>
+					</ul>
+				<% end %>
+			</td>
+			<td class="submission_clicker">Submit a new link</td>
+			<td class="submission_box" style="display:none;"><input type="text" class="alt_link_submission" data-dead-url="<%= link['dead_loc'] %>" /></td>
+		</tr>
+		<% end %>
+	</tbody>
+</table>
+<script>
+$(document).ready(function() {
+	// base url for node, not sinatra
+	var BASE_URL = 'http://localhost:3000/'; // local testing
+
+	$('.alt_link_submission').keydown(function(e) {
+		if(e.which === 13) {
+			var reqData = {
+				'alternative': $(this).val(),
+				'referrer': null,
+				'linktext': null,
+				'username': '<%= @username %>'
+			};
+			var xhr = new XMLHttpRequest();
+			xhr.open('PUT', BASE_URL+'alts/'+encodeURIComponent($(this).attr('data-dead-url')), true);
+			xhr.onreadystatechange = function() {
+				if(xhr.readyState === 4) {
+					// done! give visual feedback to user
+					// TODO: turn this shit into jquery
+					if(xhr.responseText === '201') {
+						alert('your link has been successfully submitted!');
+					} else {
+						alert('Your need to actually submit a link!');
+					}
+				}
+			};
+			xhr.send(JSON.stringify(reqData));
+		}
+	});
+
+	$('.submission_clicker').click(function() {
+		$(this).next().toggle(400);
+	});
+
+
+});
+</script>
+<%= erb :footer %>
