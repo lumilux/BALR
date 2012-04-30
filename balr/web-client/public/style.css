@@ -81,10 +81,15 @@ td {
   padding:8px;
 }
 
+.center_text {
+  text-align:center;
+}
+
 /* TOP MENU */
 
 .menu {
   list-style-type:none;
+  margin-bottom:20px;
 }
 
 .menu li {
@@ -109,4 +114,19 @@ td {
   padding:0;
 }
 
+/* home.erb */
 
+#home_stats td {
+  border:1px solid #333;
+  padding:20px;
+}
+
+#home_stats_score, #home_stats_numlinks {
+  font-size:72px;
+  margin:0 auto;
+  text-align:center;
+}
+
+#home_stats_badges_box {
+  width:260px;
+}

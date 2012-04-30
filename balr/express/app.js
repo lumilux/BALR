@@ -146,13 +146,44 @@ app.put('/alts/:dead_url', function(req, res, next) {
 app.post('/alts/:dead_url', function(req, res, next) {
   req.setEncoding('utf8');
   req.on('data', function(data) {
-    console.log(req.body);
     dead_url = querystring.unescape(req.params.dead_url);
     var jsonData = JSON.parse(data);
     console.log('JSON DATA', jsonData);
     r.hincrby('alts:'+dead_url, jsonData.alternative, 1, function(err, reply) {
+      if(err) return next(new Error(REDIS_ERROR)); 
+
       console.log('increased clicks!');
       res.json({'status': 'ok'}, 200);
+    });
+  });
+});
+
+// increase a user's score
+app.post('/users/:user/score', function(req, res, next) {
+  req.setEncoding('utf8');
+  req.on('data', function(data) {
+    console.log('data is ', data);
+    var jsonData = JSON.parse(data);
+    var user = querystring.unescape(req.params.user);
+    r.sismember('dead_locs:'+user, jsonData.dead_link, function(err, reply) {
+      if(err) return next(new Error(REDIS_ERROR)); 
+
+      // increase user's score and add to dead_locs:user if not a member
+      console.log('CHECKING REPLY FOR dead_locs:'+user, reply);
+      if(!reply) {
+        r.hincrby('users:'+user, 'score', 1, function(err, reply) {
+          if(err) return next(new Error(REDIS_ERROR)); 
+
+          console.log('increased score!');
+          r.sadd('dead_locs:'+user, jsonData.dead_link, function(err, reply) {
+            if(err) return next(new Error(REDIS_ERROR)); 
+
+            res.json({'status': 'ok'}, 200);
+          });
+        });
+      } else {
+        res.json({'status': 'nochange'}, 200);
+      }
     });
   });
 });

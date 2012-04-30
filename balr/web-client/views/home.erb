@@ -2,5 +2,34 @@
 <%= erb :loggedin_menu %>
 
 <p>Welcome back to the Battle Against Link Rot, <%= @username %>. Here's an overview of what you've done so far.</p>
-
+<table id="home_stats">
+	<tr>
+		<td class="center_text">
+			<div id="home_stats_score"><%= @score %></div>
+			<p>Points</p>
+		</td>
+		<td rowspan="3">
+			<div id="home_stats_badges_box">
+				<h3>Badges</h3>
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td class="center_text">
+			<div id="home_stats_numlinks"><%= @contributions.length %></div>
+			<p>Links Contributed</p>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<div id="home_stats_links_box">
+				<p>Recent Link Contributions: </p>
+				<ul id="home_stats_recent_links">
+					<li><a href="#">http://somelink.com</a></li>
+					<li><a href="#">http://thisotherlink.net</a></li>
+				</ul>
+			</div>
+		</td>
+	</tr>
+</table>
 <%= erb :footer %>

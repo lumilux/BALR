@@ -50,6 +50,9 @@ get '/home' do
 	@title = 'Your Homepage'
 	@username = session[:username]
 
+	@score = redis.hgetall('users:'+@username)['score']
+	@contributions = redis.smembers('contributions:'+@username)
+	
 	erb :home
 end
 
