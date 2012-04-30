@@ -34,7 +34,8 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 			var xhr = new XMLHttpRequest();
 			xhr.open('HEAD', url, true);
 			xhr.onloadend = function() {
-				if(xhr.status === 0) {
+				console.log('XHR STATUS IS', xhr.status);
+				if(xhr.status === 0 || xhr.status === 404) {
 					// if there's a bad XHR status, we redirect to BALR's page
 
 					// first we check to see if the user's network connectivity is up though, 
@@ -46,10 +47,8 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 							// if no error, then the original website really is down and we should show BALR suggestions
 							// if networkXhr gets a non-error status code, just render chrome's default
 							console.log('REFERRER IS '+refs[tab.id].prevprev);
-							console.log('submitting linktext is ', linktext, 'key is ', (tab.windowId+'-'+tab.id), 'val is ', linktext[(tab.windowId+'-'+tab.id)]['ppp']);
 							chrome.tabs.update({'url': chrome.extension.getURL('balr.html?'+url
-								+ '&ref='+refs[tab.id].prevprev
-								+ '&linktext='+linktext[tab.windowId+'-'+tab.id]['ppp'])
+								+ '&ref='+refs[tab.id].prevprev)
 							});
 						}
 					}

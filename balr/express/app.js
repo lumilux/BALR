@@ -188,4 +188,19 @@ app.post('/users/:user/score', function(req, res, next) {
   });
 });
 
+// update refs:alt_url
+app.post('/alts/:dead_url/refs', function(req, res, next) {
+  req.setEncoding('utf8');
+  req.on('data', function(data) {
+    console.log('data is ', data);
+    var jsonData = JSON.parse(data);
+    var dead_url = querystring.unescape(req.params.dead_url);
+    r.sadd('refs:'+dead_url, jsonData.referrer, function(err, reply) {
+      if(err) return next(new Error(REDIS_ERROR)); 
+
+      res.json({'status': 'ok'}, 200);
+    });
+  });
+});
+
 

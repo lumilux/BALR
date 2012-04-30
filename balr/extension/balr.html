@@ -50,7 +50,6 @@
 			var origin = f[0].substring(1); // dead URL
 			var returnUrl = origin + (origin.match(/\?/) === null ? '?nobalr' : '&nobalr'); // url to return to = deadurl + ?nobalr
 			var referrer = f[1].substring(4);
-			var linktext = f[2].substring(9);
 
 			var altOrder = [];
 
@@ -102,6 +101,16 @@
 						xhr.send(JSON.stringify({'dead_link': origin}));
 					}
 				});
+
+				// if the referrer is not null, we also want to update refs:dead_url
+				var xhr = new XMLHttpRequest();
+				xhr.open('POST', BASE_URL+'alts/'+encodeURIComponent(origin)+'/refs');
+				xhr.onreadystatechange = function() {
+					if(this.readyState === 4) {
+						console.log('RESPONSE FROM post refs is ', this.responseText);
+					}
+				};
+				xhr.send(JSON.stringify({'referrer': referrer}));
 			}
 
 			// DOM
@@ -123,7 +132,6 @@
 							var reqData = {
 								'alternative': alt_url,
 								'referrer': referrer,
-								'linktext': linktext,
 								'username': response.username
 							};
 							var xhr = new XMLHttpRequest();
