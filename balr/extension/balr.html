@@ -6,29 +6,39 @@
 		<link rel="stylesheet" href="style.css" />
 	</head>
 	<body>
-		<div id="feedback"></div>
-		<h1>Something seemed to go wrong...</h1>
-		<p>It looks like you've stumbled on a page that no longer exists! You can <a id="orig_link">try loading the page again</a> or click on a user-contributed link below.</p>
+		<div id="feedback" style="display:none;"></div>
+		<div id="main">
+			<div id="desc">
+				<h1>Something seemed to go wrong...</h1>
+				<p>It looks like you've stumbled on a page that doesn't exist!<br />
+					You can try loading <a id="orig_link"></a> again or try an alternative resource below.</p>
 
-		<p id="no_links"></p>
-		<ul id="alts"></ul>
+				<div id="link_list">
+					<p id="no_links" style="display:none;"></p>
+					<ul id="alts"></ul>
+				</div>
+			</div>
 
-		<h2>Get in the game!</h2>
-		<p>This page is shown courtesy BALR ("Battle Against Link Rot"), a service that helps improve the web, one dead link at a time. You can help out in this effort too! Submit an alternative URL for this dead link below, and it will be saved for others that stumble on this dead page as well.</p>
+			<div id="submission">
+				<h2>Get in the game!</h2>
+				<p>This page is shown courtesy of BALR ("Battle Against Link Rot"), a service that helps improve the web, one dead link at a time. You can help out in this effort too! <strong>Submit an alternative URL for this dead link below</strong>, and it will be saved for others that stumble on this dead page as well.</p>
 
-		<form id="new_link_form" onsubmit="submitAlt(); return false;">
-			<input type="text" id="new_link_text" />
-			<input type="submit" id="new_link_submit" />
-		</form>
+				<form id="new_link_form" onsubmit="submitAlt(); return false;">
+					<input type="text" id="new_link_text" />
+					<input type="submit" id="new_link_submit" />
+				</form>
 
-		<div id="balr_login" style="display:none;">
-			<h3>you need to log in first to submit a link!</h3>
-			<form id="balr_login_form" onsubmit="login(); return false;">
-				<input type="text" id="username" />
-				<input type="password" id="password" />
-				<input type="submit" id="balr_login_submit" />
-			</form>
-			<a>don't have a BALR account?</a>
+				<div id="balr_login" style="display:none;">
+					<h3>You need to log in first to submit a link!</h3>
+					<p>Logging in and submitting through a BALR account gains you points and badges.</p>
+					<form id="balr_login_form" onsubmit="login(); return false;">
+						<label for="username">Username:</label><br /><input type="text" id="username" name="username" /><br />
+						<label for="password">Password:</label><br /><input type="password" id="password" name="password" /><br />
+						<input type="submit" id="balr_login_submit" value="Login &amp; submit" />
+					</form>
+					<a href="http://localhost:4567" style="font-size:11px;">Don't have a BALR account?</a>
+				</div>
+			</div>
 		</div>
 
 		<script>
@@ -41,6 +51,8 @@
 			var returnUrl = origin + (origin.match(/\?/) === null ? '?nobalr' : '&nobalr'); // url to return to = deadurl + ?nobalr
 			var referrer = f[1].substring(4);
 			var linktext = f[2].substring(9);
+
+			var altOrder = [];
 
 			console.log('REFERRER IS ', referrer);
 
@@ -60,6 +72,7 @@
 							for(var i = 0; i < res.alternatives.length; i++) {
 								addAlt(res.alternatives[i]);
 							}
+							refreshAlts();
 						}
 					} else if(this.status === 404) {
 						noLinks();
@@ -74,14 +87,15 @@
 			// DOM
 			var orig_link = document.getElementById('orig_link');
 			orig_link.href = returnUrl;
+			orig_link.innerHTML = origin;
 
 			document.title += ' \u00bb '+origin;
 
 			// submitting a new alternative URL
 			function submitAlt() {
 				var alt_url = document.getElementById('new_link_text').value;
-				if(alt_url === '') {
-					// no link!
+				if(alt_url === '' || alt_url.match(/\b((?:[a-z][\w-]+:(?:\/{1,3}|[a-z0-9%])|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}\/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`!()\[\]{};:'".,<>?«»“”‘’]))/i) === null) {
+					showFeedback('Be sure to submit a valid link! (Did you include <code>http://</code>)?', '#f66');
 				} else {
 					// TODO: check to see if this thing is valid first
 					
@@ -102,11 +116,10 @@
 									// TODO: turn this shit into jquery
 									if(xhr.responseText === '201') {
 										addAlt({'url': alt_url, 'clicks': 0});
-										var feedback = document.getElementById('feedback');
-										feedback.innerHTML = 'Your link has been successfully submitted!';
+										refreshAlts();
+										showFeedback('Your link has been successfully submitted!', '#6f6');
 									} else {
-										var feedback = document.getElementById('feedback');
-										feedback.innerHTML = 'Your need to actually submit a link!';
+										showFeedback('Your need to actually submit a link!', '#f66');
 									}
 								}
 							};
@@ -148,13 +161,52 @@
 				});
 				li.appendChild(a);
 				li.innerHTML += ' ('+alt.clicks+')';
-				altsList.appendChild(li);
+
+				var altObj = {
+					'domNode': li,
+					'ordering': alt.clicks
+				};
+
+				// figure out where in order it belongs
+				// console.log('new altorder is ', altOrder);
+				// if(altOrder.length === 0) {
+				// 	console.log('INSIDE HERE, WHY?');
+				// 	altOrder = [altObj];
+				// 	return;
+				// } else {
+				// 	for(var i = 0; i < altOrder.length; i++) {
+				// 		if(alt.clicks >= altOrder[i].ordering) {
+				// 			altOrder = altOrder.splice(i+1, 0, altObj);
+				// 			return;
+				// 		}
+				// 	}
+				// 	altOrder.push(altObj);
+				// }
+				altOrder.push(altObj);
+			}
+
+			// after we addAlts to altOrder, we refresh the list so that it's in desc order
+			function refreshAlts() {
+				var altsList = document.getElementById('alts');
+				while(altsList.hasChildNodes()) {
+					altsList.removeChild(altsList.lastChild);
+				}
+
+				// sort by clicks
+				altOrder.sort(function(a, b) {
+					return b.ordering - a.ordering;
+				});
+
+				for(var i = 0; i < altOrder.length; i++) {
+					altsList.appendChild(altOrder[i].domNode);
+				}
 			}
 
 			// show to the user there were no links
 			function noLinks() {
 				var noLinksPara = document.getElementById('no_links');
-				noLinksPara.innerHTML = "Sorry, but currently no user-contributed links currently exist for this page. Why don't you get in the game and submit your own below?";
+				noLinksPara.innerHTML = "Sorry, but we don't know of any good alternative resources for this page right now. Why don't you help us out and submit your own below?";
+				noLinksPara.style.display = 'block';
 			}
 
 			function login() {
@@ -171,11 +223,24 @@
 					if(response.status) {
 						// save link
 						console.log('login successfully');
+						document.getElementById('balr_login').style.display = 'none';
 						submitAlt();
 					} else {
 						alert("login info not valid!");
 					}
 				});
+			}
+
+			// show & hide the feedback bar at the top
+			function showFeedback(msg, color) {
+				console.log('showFeedback!');
+				var feedback = document.getElementById('feedback');
+				feedback.innerHTML = msg;
+				feedback.style.display = 'block';
+				feedback.style.background = color;
+				setTimeout(function() {
+					feedback.style.display = 'none';
+				}, 5000);
 			}
 
 		</script>

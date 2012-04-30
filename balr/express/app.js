@@ -72,7 +72,6 @@ app.get('/alts/:dead_url', function(req, res, next) {
             res.json({status: 'ok', dead_location: dead_url, alternatives: alts_json}, 200);
           });
         } else {
-          // TODO even though this is a GET request, should we be creating a new entry in dead_locs here? 
           res.json({status: 'error', message: 'dead url not in alts: ' + dead_url}, 404);
         }
       });

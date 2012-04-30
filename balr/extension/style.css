@@ -1,4 +1,64 @@
 body {
+	font-family:'Lucida Grande', sans-serif;
+}
+
+p {
+	font-size:14px;
+}
+
+#main {
+	width:960px;
+	margin:0px auto;
+	margin-top:40px;
+}
+
+h1 {
+	margin:0;
+}
+
+h2 {
+	margin:0;
+}
+
+#desc, #submission {
+	border-radius: 8px;
+	border:1px solid #ccc;
+	padding:18px;
+	box-shadow: 2px 2px 16px 2px #ddd;
+}
+
+#desc {
+}
+
+#submission {
+	margin:40px 0px;
+}
+
+#link_list {
+	margin:5px 40px;
+}
+
+#no_links {
+	border-left:2px solid #FFCCCC;
+	padding:8px 10px;
+}
+
+#alts {
+	list-style-type:none;
+	padding:0;
+}
+
+#alts li {
+	padding:3px;
+}
+
+#alts li a {
+	color:#00f;
+}
+
+#alts li:hover {
+	background:#eee;
+	cursor:pointer;
 }
 
 #new_link_form {
@@ -15,4 +75,17 @@ body {
 
 #new_link_submit {
 	font-size:20px;
+}
+
+#feedback {
+	position:fixed;
+	top:0;
+	left:0;
+	height:40px;
+	width:100%;
+	margin:0;
+	background:#f66;
+	color:#fff;
+	padding:20px 0 0 20px;
+	box-shadow:0px 1px 6px 1px #888;
 }
