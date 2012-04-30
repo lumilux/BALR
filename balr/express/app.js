@@ -14,6 +14,14 @@ r.select(4);
 
 var REDIS_ERROR = 'something went wrong with redis';
 
+var allowCrossDomain = function(req, res, next) {
+    res.header('Access-Control-Allow-Origin', 'http://localhost:4567');
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type');
+
+    next();
+};
+
 var app = module.exports = express.createServer();
 
 // Configuration
@@ -23,6 +31,7 @@ app.configure(function(){
   app.set('view engine', 'jade');
   app.use(express.bodyParser());
   app.use(express.methodOverride());
+  app.use(allowCrossDomain);
   app.use(app.router);
   app.use(express.static(__dirname + '/public'));
 });
@@ -63,6 +72,7 @@ app.get('/alts/:dead_url', function(req, res, next) {
             res.json({status: 'ok', dead_location: dead_url, alternatives: alts_json}, 200);
           });
         } else {
+          // TODO even though this is a GET request, should we be creating a new entry in dead_locs here? 
           res.json({status: 'error', message: 'dead url not in alts: ' + dead_url}, 404);
         }
       });
@@ -99,22 +109,26 @@ app.put('/alts/:dead_url', function(req, res, next) {
             if(err) return next(new Error(REDIS_ERROR));
 
             // add to refs:dead_link list, which holds a list of URLs that refer to this dead link
-            r.sadd('refs:'+dead_url, jsonData.referrer, function(err, reply) {
-              if(err) return next(new Error(REDIS_ERROR));
+            if(jsonData.referrer !== 'null' && jsonData.referrer !== null) { // NB: null here can be a string
+              r.sadd('refs:'+dead_url, jsonData.referrer, function(err, reply) {
+                if(err) return next(new Error(REDIS_ERROR));
+              });
+            }
 
-              // add to list of dead urls this user has submitted
+            // add to list of dead urls this user has submitted
+            if(jsonData.username !== null) {
               r.sadd('contributions:'+jsonData.username, dead_url, function(err, reply) {
                 if(err) return next(new Error(REDIS_ERROR));
-
-                // add to list of alternative URLs this user has provided for this particular dead url
-                r.sadd('contributions:'+jsonData.username+':'+dead_url, alt_url, function(err, reply) {
-                  if(err) return next(new Error(REDIS_ERROR));   
-                  
-                  res.json(201); // everything went better than expected               
-                  // HOLY FUCK NESTING
-                });
               });
-            });
+
+              // add to list of alternative URLs this user has provided for this particular dead url
+              r.sadd('contributions:'+jsonData.username+':'+dead_url, alt_url, function(err, reply) {
+                if(err) return next(new Error(REDIS_ERROR));  
+              }); 
+            }
+                  
+            res.json(201); // everything went better than expected               
+
           });
         });
       });
@@ -123,3 +137,20 @@ app.put('/alts/:dead_url', function(req, res, next) {
     }
   }); // end req.on(data)
 }); // end app.put
+
+// when POSTing, increase the count of clicks by 1
+app.post('/alts/:dead_url', function(req, res, next) {
+  req.setEncoding('utf8');
+  req.on('data', function(data) {
+    console.log(req.body);
+    dead_url = querystring.unescape(req.params.dead_url);
+    var jsonData = JSON.parse(data);
+    console.log('JSON DATA', jsonData);
+    r.hincrby('alts:'+dead_url, jsonData.alternative, 1, function(err, reply) {
+      console.log('increased clicks!');
+      res.json({'status': 'ok'}, 200);
+    });
+  });
+});
+
+

@@ -125,7 +125,29 @@
 			function addAlt(alt) {
 				var altsList = document.getElementById('alts');
 				var li = document.createElement('li');
-				li.innerHTML = '<a href="'+alt.url+'">'+alt.url+'</a> ('+alt.clicks+')';
+				var a = document.createElement('a');
+				// a.href = alt.url;
+				a.innerHTML = alt.url;
+				// a.addEventListener('click',  function() {
+				// 	console.log('INSIDE A CLICK, alt urls is ', alt.url);
+				// 	return false;
+					
+				// });
+				li.addEventListener('click', function() {
+					var xhr = new XMLHttpRequest();
+					xhr.open('POST', BASE_URL+'alts/'+encodeURIComponent(origin), true);
+					xhr.onreadystatechange = function() {
+						if(xhr.readyState === 4) {
+							console.log('response is '+xhr.responseText);
+							window.location = alt.url;
+						}
+					};
+					var data = {'alternative': alt.url};
+					console.log('sent', data, 'origin is ', origin);
+					xhr.send(JSON.stringify(data));
+				});
+				li.appendChild(a);
+				li.innerHTML += ' ('+alt.clicks+')';
 				altsList.appendChild(li);
 			}
 

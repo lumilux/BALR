@@ -3,7 +3,7 @@ require 'sinatra'
 require 'sinatra/redis'
 require 'bcrypt'
 
-set :redis, 'redis://localhost:6379/0'
+set :redis, 'redis://localhost:6379/4'
 set :path, 'http://localhost:4567'
 
 enable :sessions
@@ -48,6 +48,7 @@ get '/home' do
 	end
 	
 	@title = 'Your Homepage'
+	@username = session[:username]
 
 	erb :home
 end
@@ -58,10 +59,10 @@ get '/user/:username' do
 
 	# get list of this user's contributed links
 	@user_contributions = {}
-	@user_deadlinks = redis.lrange('contributions:'+@username, 0, -1)
+	@user_deadlinks = redis.smembers('contributions:'+@username)
 	@user_deadlinks.each { |deadlink|
 		@user_contributions[deadlink] = [] # array of hashes: [{altlink, score}, {altlink, score}, ... ]
-		@alt_links = redis.lrange('contributions:'+@username+':'+deadlink, 0, -1)
+		@alt_links = redis.smembers('contributions:'+@username+':'+deadlink)
 		@alt_links.each { |altlink|
 			@altlink_score = redis.hget('alts:'+deadlink, altlink)
 			@user_contributions[deadlink].push( {'alt' => altlink, 'score' => @altlink_score} )
@@ -90,6 +91,7 @@ post '/login' do
 		
 		if @bcrypt_pass == @password
 			session[:auth] = true
+			session[:username] = @username
 			if @remote
 				'{"status": true, "username": "'+@username+'"}'
 			else
@@ -136,6 +138,32 @@ post '/new/user' do
 	else
 		'false'
 	end
+end
+
+get '/battle' do
+	if not session[:auth]
+		redirect '/login'
+	end
+
+	@username = session[:username]
+	@title = 'Battle!'
+
+	@links = []
+	@dead_locs = redis.smembers 'dead_locs'
+	@dead_locs.each { |loc|
+		@alts = redis.hgetall('alts:'+loc)
+
+		# only add to links list if there are no alternative links
+		if @alts.length == 0
+			@refs = redis.smembers('refs:'+loc)
+			puts 'refs for '+loc+' is ', @refs
+			@links.push( {'dead_loc' => loc, 'refs' => @refs} )
+		end
+	}
+
+	puts 'links is ', @links
+
+	erb :battle
 end
 
 def checkAuth()
