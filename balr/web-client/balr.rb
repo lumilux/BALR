@@ -12,6 +12,8 @@ get '/' do
 	checkAuth()
 
 	@title = 'Home'
+	@active = 'home'
+
 	erb :index
 end
 
@@ -19,6 +21,7 @@ get '/signup' do
 	checkAuth()
 
 	@title = 'Sign Up'
+	@active = 'signup'
 
 	@failed_login = params[:redirected]
 	erb :signup
@@ -28,6 +31,7 @@ get '/login' do
 	checkAuth()
 
 	@title = 'Log in'
+	@active = 'login'
 
 	@failed_login = params[:failed]
 	erb :login
@@ -49,10 +53,11 @@ get '/home' do
 	
 	@title = 'Your Homepage'
 	@username = session[:username]
+	@active = 'home'
 
 	@score = redis.hgetall('users:'+@username)['score']
 	@contributions = redis.smembers('contributions:'+@username)
-	
+
 	erb :home
 end
 
@@ -150,6 +155,7 @@ get '/battle' do
 
 	@username = session[:username]
 	@title = 'Battle!'
+	@active = 'battle'
 
 	@links = []
 	@dead_locs = redis.smembers 'dead_locs'
@@ -175,6 +181,7 @@ get '/leaderboard' do
 	end
 
 	@title = 'Leaderboard'
+	@active = 'leaderboard'
 	
 	@usernames = redis.smembers 'users'
 	@users = []

@@ -1,6 +1,6 @@
 <ul class="menu">
-	<li><a href="/home">Home</a></li>
-	<li><a href="/battle">Get to the Front Lines</a></li>
-	<li><a href="/leaderboard">Leaderboard</a></li>
+	<li class="<%= if @active == 'home' then 'active' else 'inactive' end %>"><a href="/home">Home</a></li>
+	<li class="<%= if @active == 'battle' then 'active' else 'inactive' end %>"><a href="/battle">Get to the Front Lines</a></li>
+	<li class="<%= if @active == 'leaderboard' then 'active' else 'inactive' end %>"><a href="/leaderboard">Leaderboard</a></li>
 	<li><a href="/logout">Logout</a></li>
 </ul>

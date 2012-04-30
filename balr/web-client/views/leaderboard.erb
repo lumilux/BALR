@@ -1,21 +1,22 @@
 <%= erb :header %>
 <%= erb :loggedin_menu %>
-
-<table id="leaderboard">
-	<thead>
-		<tr>
-			<td>User</td>
-			<td>Score</td>
-		</tr>
-	</thead>
-	<tbody>
-		<% @users.each do |user| %>
-		<tr>
-			<td><%= user['username'] %></td>
-			<td><%= user['score'] %></td>
-		</tr>
-		<% end %>
-	</tbody>
-</table>
-
+<div class="content">
+	<p>Did you stumble across a dead link and then get saved by a BALR replacement?<br />You have these heroes to thank.</p>
+	<table id="leaderboard">
+		<thead>
+			<tr>
+				<td>User</td>
+				<td>Score</td>
+			</tr>
+		</thead>
+		<tbody>
+			<% @users.each do |user| %>
+			<tr>
+				<td><%= user['username'] %></td>
+				<td><%= user['score'] %></td>
+			</tr>
+			<% end %>
+		</tbody>
+	</table>
+</div>
 <%= erb :footer %>

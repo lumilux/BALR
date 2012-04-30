@@ -53,10 +53,15 @@ body {
 }
 
 h1 {
-  font-size:36px;
-  padding-top:60px;
+  font-size:42px;
+  padding-top:52px;
   padding-left:9px;
   font-weight:bold;
+}
+
+h1 a {
+  color:#fff;
+  text-decoration:none;
 }
 
 em {
@@ -81,8 +86,26 @@ td {
   padding:8px;
 }
 
+p {
+  margin:10px;
+}
+
+strong {
+  font-weight:bold;
+}
+
+h4 {
+  font-weight:bold;
+  font-size:22px;
+  margin:18px 0 10px 10px;
+}
+
 .center_text {
   text-align:center;
+}
+
+.huge {
+  font-size:72px;
 }
 
 /* TOP MENU */
@@ -90,11 +113,65 @@ td {
 .menu {
   list-style-type:none;
   margin-bottom:20px;
+  padding:10px 0;
+  border-bottom:1px solid #aaa;
 }
 
 .menu li {
   display:inline;
   margin:0 10px;
+}
+
+.menu li:hover, .menu li.active {
+  border-bottom:4px solid #ccc;
+}
+
+.menu li a {
+  color:#00f;
+  text-decoration:none;
+  font-size:18px;
+}
+
+/* index.erb */
+
+.content {
+  width:820px;
+  margin:20px auto;
+}
+
+#main .huge {
+  text-align:center;
+  font-size:64px;
+  font-weight:bold;
+  margin-top:60px;
+}
+
+#main h3 {
+  text-align:center;
+  font-size:32px;
+  margin:10px 0 30px 0;
+}
+
+/* signup.erb */
+
+#signup {
+  text-align:center;
+}
+
+/* login.erb */
+
+#login {
+  text-align:center;
+}
+
+#account_created {
+  background:#cfc;
+  padding:10px;
+}
+
+#failed_login {
+  background:#fcc;
+  padding:10px;
 }
 
 /* battle.erb */
@@ -121,8 +198,11 @@ td {
   padding:20px;
 }
 
+#home_stats td p {
+  margin:0;
+}
+
 #home_stats_score, #home_stats_numlinks {
-  font-size:72px;
   margin:0 auto;
   text-align:center;
 }
@@ -130,3 +210,16 @@ td {
 #home_stats_badges_box {
   width:260px;
 }
+
+/* leaderboard.erb */
+
+#leaderboard {
+  width:300px;
+  margin:0 auto;
+  font-size:22px;
+}
+
+#leaderboard thead {
+  background:#ccc;
+}
+

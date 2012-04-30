@@ -1,12 +1,16 @@
 <%= erb :header %>
-<div id="main">
+<%= erb :loggedout_menu %>
+<div id="signup" class="content">
 	<% if @failed_login %>
 		<p>Are you registered yet? We couldn't find your username!</p>
 	<% end %>
+	<p>Sign up below!</p>
 	<form id="signup_form" onsubmit="return false;">
-		<input type="text" name="username" /><br />
-		<input type="password" name="password" /><br />
-		<input type="submit" />
+		<label for="username">Username</label><br />
+		<input type="text" name="username" /><br /><br />
+		<label for="password">Password</label><br />
+		<input type="password" name="password" /><br /><br />
+		<input type="submit" value="Sign up" />
 	</form>
 </div>
 
@@ -21,7 +25,11 @@ $(document).ready(function() {
 				'password': $('input[name="password"]').val()
 			},
 			success: function(data) {
-				console.log(data);
+				if(data === 'false') {
+					alert('That username has already been taken!');
+				} else {
+					window.location = '/login?newaccount';
+				}
 			}
 		});
 	});
