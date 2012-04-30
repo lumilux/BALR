@@ -124,6 +124,11 @@ app.put('/alts/:dead_url', function(req, res, next) {
               r.sadd('contributions:'+jsonData.username+':'+dead_url, alt_url, function(err, reply) {
                 if(err) return next(new Error(REDIS_ERROR));  
               }); 
+
+              // increase this user's score
+              r.hincrby('users:'+jsonData.username, 'score', 1, function(err, reply) {
+                if(err) return next(new Error(REDIS_ERROR));
+              });
             }
                   
             res.json(201); // everything went better than expected               
