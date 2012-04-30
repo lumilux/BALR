@@ -125,8 +125,8 @@ post '/new/user' do
 	puts redis.hlen(@r_hash_name)
 	if redis.hlen(@r_hash_name) == 0
 
-		# create new user in user_list
-		redis.rpush 'users', @username
+		# create new user in users set
+		redis.sadd 'users', @username
 
 		# create hew user hash
 		redis.hmset @r_hash_name, 'password', @password, 'score', 0
@@ -164,6 +164,16 @@ get '/battle' do
 	puts 'links is ', @links
 
 	erb :battle
+end
+
+get '/leaderboard' do
+	if not session[:auth]
+		redirect '/login'
+	end
+
+	@title = 'Leaderboard'
+	
+
 end
 
 def checkAuth()
