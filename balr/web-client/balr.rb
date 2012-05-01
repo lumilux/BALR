@@ -57,6 +57,7 @@ get '/home' do
 
 	@score = redis.hgetall('users:'+@username)['score']
 	@contributions = redis.smembers('contributions:'+@username)
+	@badges = redis.smembers('badges:'+@username)
 
 	erb :home
 end
