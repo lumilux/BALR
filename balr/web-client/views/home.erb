@@ -10,9 +10,16 @@
 			</td>
 			<td rowspan="3">
 				<div id="home_stats_badges_box">
-					<h3>Badges</h3>
-					<div id="badges"></div>
-					<p id="nobadges"><em>No badges yet :( <a href="/battle">Need help gaining them?</a></em></p>
+					<h3>Badges (<%= @badges.length %>)</h3>
+					<% if @badges.length > 0 %>
+						<ul id="home_stats_badges_list">
+							<% @badges.each do |badge| %>
+								<li><%= badge %></li>
+							<% end %>
+					<% else %>
+						<p id="nobadges"><em>No badges yet :( <a href="/battle">Need help gaining them?</a></em></p>
+					<% end %>
+					</ul>
 				</div>
 			</td>
 		</tr>
