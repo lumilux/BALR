@@ -160,14 +160,12 @@ app.post('/alts/:dead_url', function(req, res, next) {
 
 // get a user's badges
 app.get('/users/:user/achievements', function(req, res, next) {
-  r.hgetall('user:'+user, function(err, obj) {
+  user = querystring.unescape(req.params.user)
+  r.smembers('badges:'+user, function(err, reply) {
     if(err) return next(new Error(REDIS_ERROR));
-
-    if(obj !== undefined) {
-      user_score = obj.score;
-      user_badges = obj.badges;
-  
-      res.json({score: user_score, badges: user_badges});
+      
+    if(reply) {
+      res.json({badges: reply});
     } else {
       res.json({status: 'error', message: 'user object undefined for: '+user});
     }
@@ -201,14 +199,15 @@ app.post('/users/:user/score', function(req, res, next) {
             if(err) return next(new Error(REDIS_ERROR)); 
 
             // award badges based on points
+            console.log('REPLY FOR BADGES IS', reply, 'type of ', typeof reply);
             switch(reply) {
-              case 1:
+              case '1':
                 r.sadd('badges:'+user, 'Forager');
                 break;
-              case 10:
+              case '12':
                 r.sadd('badges:'+user, 'Hunter');
                 break;
-              case 25:
+              case '25':
                 r.sadd('badges:'+user, 'BALlin');
                 break;
             }

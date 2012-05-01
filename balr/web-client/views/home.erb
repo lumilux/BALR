@@ -11,7 +11,8 @@
 			<td rowspan="3">
 				<div id="home_stats_badges_box">
 					<h3>Badges</h3>
-					<p><em>No badges yet :( <a href="/battle">Need help gaining them?</a></em></p>
+					<div id="badges"></div>
+					<p id="nobadges"><em>No badges yet :( <a href="/battle">Need help gaining them?</a></em></p>
 				</div>
 			</td>
 		</tr>
@@ -39,4 +40,24 @@
 		</tr>
 	</table>
 </div>
+<script>
+$(document).ready(function() {
+	$.ajax({
+		url: 'http://localhost:3000/users/<%= @username %>/achievements',
+		type: 'GET',
+		success: function(data) {
+			var badges = data.badges;
+			if(badges.length > 0) {
+				var badgesNode = document.getElementById('badges');
+				for(var i = 0; i < badges.length; i++) {
+					var badgeImg = document.createElement('img');
+					badgeImg.src = '/images/'+badges[i]+'.png';
+					badgesNode.appendChild(badgeImg);
+				}
+				document.getElementById('nobadges').style.display = 'none';
+			}
+		}
+	});
+});
+</script>
 <%= erb :footer %>
