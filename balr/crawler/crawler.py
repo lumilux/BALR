@@ -4,6 +4,9 @@ import redis
 import time
 import sys
 from collections import deque
+import socket
+
+socket.setdefaulttimeout(1.0)
 
 br = mechanize.Browser()
 cookies = mechanize.CookieJar()
