@@ -3,7 +3,7 @@ require 'sinatra'
 require 'sinatra/redis'
 require 'bcrypt'
 
-set :redis, 'redis://localhost:6379/4'
+set :redis, 'redis://localhost:6379/5'
 set :path, 'http://localhost:4567'
 
 enable :sessions

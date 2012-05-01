@@ -1,7 +1,7 @@
 <%= erb :header %>
 <%= erb :loggedin_menu %>
 <div class="content">
-	<p>Welcome back to the Battle Against Link Rot, <%= @username %>. Here's an overview of what you've done so far.</p>
+	<p>Welcome back to the Battle Against Link Rot, <%= @username %>. Here's an overview of what you've done so far. <a href="/balr.crx">Get the Chrome Extension</a> and join the fight.</p>
 	<table id="home_stats">
 		<tr>
 			<td class="center_text">
@@ -11,24 +11,29 @@
 			<td rowspan="3">
 				<div id="home_stats_badges_box">
 					<h3>Badges</h3>
+					<p><em>No badges yet :( <a href="/battle">Need help gaining them?</a></em></p>
 				</div>
 			</td>
 		</tr>
 		<tr>
 			<td class="center_text">
 				<div id="home_stats_numlinks" class="huge"><%= @contributions.length %></div>
-				<p>Dead Links Found</p>
+				<p>Dead Links Resolved</p>
 			</td>
 		</tr>
 		<tr>
 			<td>
 				<div id="home_stats_links_box">
 					<p>Recent Contributions: </p>
+					<% if @contributions.length > 0 %>
 					<ul id="home_stats_recent_links">
 						<% @contributions.first(5).each do |contr| %>
 							<li><a href="<%= contr %>"><%= contr %></a></li>
 						<% end %>
 					</ul>
+					<% else %>
+					<p><em>No recent contributions :( <a href="/battle">Need inspiration?</a></em></p>
+					<% end %>
 				</div>
 			</td>
 		</tr>

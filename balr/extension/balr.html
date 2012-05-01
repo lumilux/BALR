@@ -110,7 +110,10 @@
 						console.log('RESPONSE FROM post refs is ', this.responseText);
 					}
 				};
-				xhr.send(JSON.stringify({'referrer': referrer}));
+				if(referrer.match(/^http\:\/\/localhost/) === null && referrer.match(/^chrome\:\/\//) === null
+					&& referrer !== origin) {
+					xhr.send(JSON.stringify({'referrer': referrer}));
+				}
 			}
 
 			// DOM

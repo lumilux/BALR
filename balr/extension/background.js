@@ -46,9 +46,9 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
 						if(networkXhr.status !== 0) {
 							// if no error, then the original website really is down and we should show BALR suggestions
 							// if networkXhr gets a non-error status code, just render chrome's default
-							console.log('REFERRER IS '+refs[tab.id].prevprev);
+							console.log('REFERRER IS '+refs[tab.id].prev);
 							chrome.tabs.update({'url': chrome.extension.getURL('balr.html?'+url
-								+ '&ref='+refs[tab.id].prevprev)
+								+ '&ref='+refs[tab.id].prev)
 							});
 						}
 					}

@@ -10,7 +10,7 @@ var express = require('express')
 var redis = require('redis')
   , r = redis.createClient();
 
-r.select(4);
+r.select(5);
 
 var REDIS_ERROR = 'something went wrong with redis';
 
