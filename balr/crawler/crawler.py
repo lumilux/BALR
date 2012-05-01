@@ -34,7 +34,7 @@ while True:
             if len(links_to_crawl) <= 500:
                 for link in br.links():
                     #print link
-                    if link.url.startswith('//') or link.url[0] != '/':
+                    if link.url.startswith('//') or link.url.startswith('http://') or link.url.startswith('https://'):
                         links_to_crawl.append((link.absolute_url, br.geturl()))
     except mechanize.BrowserStateError as e:
         continue
