@@ -158,6 +158,27 @@ app.post('/alts/:dead_url', function(req, res, next) {
   });
 });
 
+// get a user's badges
+app.get('/users/:user/achievements', function(req, res, next) {
+  r.hgetall('user:'+user, function(err, obj) {
+    if(err) return next(new Error(REDIS_ERROR));
+
+    if(obj !== undefined) {
+      user_score = obj.score;
+      user_badges = obj.badges;
+  
+      res.json({score: user_score, badges: user_badges});
+    } else {
+      res.json({status: 'error', message: 'user object undefined for: '+user});
+    }
+  });
+});
+
+// get the leaderboard (top 20 players by score)
+app.get('/users/leaderboard', function(req, res, next) {
+  res.json({status: 'error', message: 'tell Hans to do this right now'}, 501);
+});
+
 // increase a user's score
 app.post('/users/:user/score', function(req, res, next) {
   req.setEncoding('utf8');
@@ -175,10 +196,35 @@ app.post('/users/:user/score', function(req, res, next) {
           if(err) return next(new Error(REDIS_ERROR)); 
 
           console.log('increased score!');
-          r.sadd('dead_locs:'+user, jsonData.dead_link, function(err, reply) {
+          
+          r.hget('users:'+user, 'score', function(err, reply) {
             if(err) return next(new Error(REDIS_ERROR)); 
 
-            res.json({'status': 'ok'}, 200);
+            // award badges based on points
+            switch(reply) {
+              case 1:
+                r.sadd('badges:'+user, 'Forager');
+                break;
+              case 10:
+                r.sadd('badges:'+user, 'Hunter');
+                break;
+              case 25:
+                r.sadd('badges:'+user, 'BALlin');
+                break;
+            }
+
+            //TODO: award badges based on submitted dead/alt link
+            var re_edu = new RegExp("//(\w+\.)+edu/");
+            if(re_edu.exec(jsonData.dead_link)) {
+              r.sadd('badges:'+user, 'Student');
+            }
+
+            // if the dead loc has not been encountered, add as member of dead_locs
+            r.sadd('dead_locs:'+user, jsonData.dead_link, function(err, reply) {
+              if(err) return next(new Error(REDIS_ERROR)); 
+  
+              res.json({'status': 'ok'}, 200);
+            });
           });
         });
       } else {
@@ -202,5 +248,4 @@ app.post('/alts/:dead_url/refs', function(req, res, next) {
     });
   });
 });
-
 

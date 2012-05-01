@@ -20,8 +20,7 @@ print links_to_crawl
 
 while True:
     next_url = links_to_crawl.popleft()
-    print('checking: ' + next_url)
-    print(str(len(links_to_crawl)))
+    print(str(len(links_to_crawl)) + ' left; checking: ' + next_url)
     
     if r2.sismember('checked', next_url):
         continue
@@ -37,6 +36,7 @@ while True:
     except mechanize.BrowserStateError as e:
         continue
     except (urllib2.HTTPError, urllib2.URLError) as e:
+        r.sadd('refs:'+next_url, br.geturl())
         r.sadd('dead_locs', next_url)
         print('dead: ' + next_url)
     
