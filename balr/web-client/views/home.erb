@@ -10,11 +10,13 @@
 			</td>
 			<td rowspan="3">
 				<div id="home_stats_badges_box">
-					<h3>Badges (<%= @badges.length %>)</h3>
-					<ul id="home_stats_badges_list">
-						<% @badges.each do |badge| %>
-							<li><%= badge %></li>
-						<% end %>
+					<% if @badges %>
+						<h3>Badges (<%= @badges.length %>)</h3>
+						<ul id="home_stats_badges_list">
+							<% @badges.each do |badge| %>
+								<li><%= badge %></li>
+							<% end %>
+					<% end %>
 					</ul>
 				</div>
 			</td>
