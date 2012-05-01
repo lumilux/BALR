@@ -12,14 +12,14 @@ br.addheaders = [("User-agent", "Mozilla/5.0 (compatible; MSIE 5.5; Windows NT)"
 br.set_handle_robots(False)
 
 r = redis.Redis(host='localhost', port=6379, db=4)
-r2 = redis.Redis(host='localhost', port=6379, db=5)
+r2 = redis.Redis(host='localhost', port=6379, db=6)
 
-links_to_crawl = deque([sys.argv[1]])
+links_to_crawl = deque([(sys.argv[1], '')])
 
 print links_to_crawl
 
 while True:
-    next_url = links_to_crawl.popleft()
+    next_url, ref = links_to_crawl.popleft()
     print(str(len(links_to_crawl)) + ' left; checking: ' + next_url)
     
     if r2.sismember('checked', next_url):
@@ -32,11 +32,11 @@ while True:
                 for link in br.links():
                     #print link
                     if link.url.startswith('//') or link.url[0] != '/':
-                        links_to_crawl.append(link.absolute_url)
+                        links_to_crawl.append((link.absolute_url, br.geturl()))
     except mechanize.BrowserStateError as e:
         continue
     except (urllib2.HTTPError, urllib2.URLError) as e:
-        r.sadd('refs:'+next_url, br.geturl())
+        r.sadd('refs:'+next_url, ref)
         r.sadd('dead_locs', next_url)
         print('dead: ' + next_url)
     
