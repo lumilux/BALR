@@ -180,6 +180,8 @@ h4 {
 }
 
 #dead_locs_table td {
+  max-width:400px;
+  word-wrap:break-word;
 }
 
 .submission_clicker {
@@ -209,6 +211,15 @@ h4 {
 
 #home_stats_badges_box {
   width:260px;
+}
+
+#home_stats_badges_list {
+  margin-top:10px;
+}
+
+#home_stats_badges_list li {
+  padding:5px;
+  display:inline;
 }
 
 /* leaderboard.erb */

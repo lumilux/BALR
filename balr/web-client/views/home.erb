@@ -14,7 +14,7 @@
 					<% if @badges.length > 0 %>
 						<ul id="home_stats_badges_list">
 							<% @badges.each do |badge| %>
-								<li><%= badge %></li>
+								<li><img src="/images/<%= badge.downcase! %>.png" alt="<%= badge %>" title="<%= badge %>" /></li>
 							<% end %>
 					<% else %>
 						<p id="nobadges"><em>No badges yet :( <a href="/battle">Need help gaining them?</a></em></p>
