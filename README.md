@@ -18,3 +18,13 @@ DEPENDENCIES
     * sinatra: sudo gem install sinatra
     * redis: sudo gem install sinatra-redis
     * bcrypt-ruby: sudo gem install bcrypt-ruby
+
+RUNNING
+-------
+Make sure you have redis running as a server: ```redis-server```. Please see the [Redis Quick Start guide](http://redis.io/topics/quickstart) for more details on running Redis.
+
+To run the crawler, do ```python crawler/crawler.py http://www.metafilter.com/archived.mefi/02/01/2000/```, for example.
+
+To run the node server, do ```node express/app.js```.
+
+To run the web front-end, do ```ruby web-client/balr.rb```.
