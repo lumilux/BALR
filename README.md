@@ -28,3 +28,7 @@ To run the crawler, do ```python crawler/crawler.py http://www.metafilter.com/ar
 To run the node server, do ```node express/app.js```.
 
 To run the web front-end, do ```ruby web-client/balr.rb```.
+
+NOTE
+----
+```express/node_modules/``` is included so that express does not need to be set up. Note, however, that the contents of this directory are dependencies and were not written by us.
